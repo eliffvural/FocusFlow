@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import { Calendar, CheckSquare, LayoutDashboard, Plus, Settings } from 'lucide-react'
+import { StickerPanel } from './sticker-panel'
 
 const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', id: 'dashboard' },
@@ -42,6 +43,8 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
                     </button>
                 ))}
             </nav>
+
+            <StickerPanel />
 
             <div className="mt-auto px-2">
                 <div className="bg-slate-900 rounded-xl p-4 shadow-sm">

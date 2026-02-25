@@ -76,6 +76,20 @@ export function CalendarView({ tasks }: CalendarViewProps) {
                                         key={task.id}
                                         draggable
                                         onDragStart={(e) => handleDragStart(e, task.id)}
+                                        onDragOver={(e) => {
+                                            if (e.dataTransfer.types.includes('sticker')) {
+                                                e.preventDefault()
+                                                e.stopPropagation()
+                                            }
+                                        }}
+                                        onDrop={(e) => {
+                                            const sticker = e.dataTransfer.getData('sticker')
+                                            if (sticker) {
+                                                e.preventDefault()
+                                                e.stopPropagation()
+                                                updateTask.mutate({ id: task.id, emoji: sticker })
+                                            }
+                                        }}
                                         className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing group"
                                     >
                                         <div className="flex items-center space-x-2 mb-1">

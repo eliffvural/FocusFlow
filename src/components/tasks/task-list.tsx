@@ -13,6 +13,18 @@ export function TaskList() {
             {tasks.map((task: TaskWithCategory) => (
                 <div
                     key={task.id}
+                    onDragOver={(e) => {
+                        if (e.dataTransfer.types.includes('sticker')) {
+                            e.preventDefault()
+                        }
+                    }}
+                    onDrop={(e) => {
+                        const sticker = e.dataTransfer.getData('sticker')
+                        if (sticker) {
+                            e.preventDefault()
+                            updateTask.mutate({ id: task.id, emoji: sticker })
+                        }
+                    }}
                     className={cn(
                         "p-5 flex items-center justify-between transition-all group hover:bg-slate-50/80",
                         task.status === 'done' && "bg-slate-50/40"
