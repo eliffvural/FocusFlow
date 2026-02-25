@@ -77,14 +77,22 @@ export function CalendarView({ tasks }: CalendarViewProps) {
                                         draggable
                                         onDragStart={(e) => handleDragStart(e, task.id)}
                                         onDragOver={(e) => {
-                                            if (e.dataTransfer.types.includes('sticker')) {
+                                            const isSticker = e.dataTransfer.types.includes('text/plain')
+                                            if (isSticker) {
                                                 e.preventDefault()
                                                 e.stopPropagation()
+                                                e.currentTarget.classList.add('ring-2', 'ring-indigo-500', 'scale-105')
                                             }
                                         }}
+                                        onDragLeave={(e) => {
+                                            e.currentTarget.classList.remove('ring-2', 'ring-indigo-500', 'scale-105')
+                                        }}
                                         onDrop={(e) => {
-                                            const sticker = e.dataTransfer.getData('sticker')
-                                            if (sticker) {
+                                            const data = e.dataTransfer.getData('text/plain')
+                                            e.currentTarget.classList.remove('ring-2', 'ring-indigo-500', 'scale-105')
+
+                                            if (data?.startsWith('sticker:')) {
+                                                const sticker = data.split(':')[1]
                                                 e.preventDefault()
                                                 e.stopPropagation()
                                                 updateTask.mutate({ id: task.id, emoji: sticker })

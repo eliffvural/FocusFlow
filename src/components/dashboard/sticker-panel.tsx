@@ -5,7 +5,7 @@ const STICKERS = ['🎯', '📚', '💻', '🏃', '🍕', '🎨', '✈️', '�
 
 export function StickerPanel() {
     const handleDragStart = (e: React.DragEvent, sticker: string) => {
-        e.dataTransfer.setData('sticker', sticker)
+        e.dataTransfer.setData('text/plain', `sticker:${sticker}`)
     }
 
     return (

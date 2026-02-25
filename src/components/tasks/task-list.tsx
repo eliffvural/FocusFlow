@@ -14,19 +14,27 @@ export function TaskList() {
                 <div
                     key={task.id}
                     onDragOver={(e) => {
-                        if (e.dataTransfer.types.includes('sticker')) {
+                        const isSticker = e.dataTransfer.types.includes('text/plain')
+                        if (isSticker) {
                             e.preventDefault()
+                            e.currentTarget.classList.add('bg-indigo-50/50', 'ring-2', 'ring-indigo-500/20')
                         }
                     }}
+                    onDragLeave={(e) => {
+                        e.currentTarget.classList.remove('bg-indigo-50/50', 'ring-2', 'ring-indigo-500/20')
+                    }}
                     onDrop={(e) => {
-                        const sticker = e.dataTransfer.getData('sticker')
-                        if (sticker) {
+                        const data = e.dataTransfer.getData('text/plain')
+                        e.currentTarget.classList.remove('bg-indigo-50/50', 'ring-2', 'ring-indigo-500/20')
+
+                        if (data?.startsWith('sticker:')) {
+                            const sticker = data.split(':')[1]
                             e.preventDefault()
                             updateTask.mutate({ id: task.id, emoji: sticker })
                         }
                     }}
                     className={cn(
-                        "p-5 flex items-center justify-between transition-all group hover:bg-slate-50/80",
+                        "p-5 flex items-center justify-between transition-all group hover:bg-slate-50/80 rounded-xl mx-2 my-1 border border-transparent",
                         task.status === 'done' && "bg-slate-50/40"
                     )}
                 >
