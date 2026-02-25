@@ -5,9 +5,7 @@ import { DashboardContent } from '@/components/dashboard/dashboard-content'
 import { useSupabase } from '@/components/providers/supabase-provider'
 import { CreateTaskDialog } from '@/components/tasks/create-task-dialog'
 import { TaskList } from '@/components/tasks/task-list'
-import { usePomodoro } from '@/hooks/use-pomodoro'
 import { TaskWithCategory, useTasks } from '@/hooks/use-tasks'
-import { cn } from '@/lib/utils'
 import { AppWindow, CheckCircle2, Clock, TrendingUp } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -15,7 +13,6 @@ import { useEffect, useState } from 'react'
 export default function Home() {
     const [activeTab, setActiveTab] = useState('dashboard')
     const [isDialogOpen, setIsDialogOpen] = useState(false)
-    const { formatTime, isActive, startTimer, pauseTimer, progress, timeLeft } = usePomodoro()
     const { tasks } = useTasks()
     const { user, supabase } = useSupabase()
     const router = useRouter()
@@ -78,8 +75,8 @@ export default function Home() {
                         ))}
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                        <div className="lg:col-span-8 space-y-6">
+                    <div className="grid grid-cols-1 gap-8 items-start">
+                        <div className="space-y-6">
                             <div className="flex items-center justify-between px-1">
                                 <h3 className="text-xl font-bold text-slate-900">Görev Listesi</h3>
                                 <button className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold">Tümünü Yönet</button>
@@ -87,36 +84,6 @@ export default function Home() {
 
                             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                                 <TaskList />
-                            </div>
-                        </div>
-
-                        <div className="lg:col-span-4 space-y-6">
-                            <h3 className="text-xl font-bold text-slate-900 px-1">Odak Modu</h3>
-                            <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col items-center text-center space-y-8">
-                                <div className="relative w-48 h-48 flex items-center justify-center">
-                                    <svg className="w-full h-full -rotate-90">
-                                        <circle cx="96" cy="96" r="86" stroke="currentColor" strokeWidth="10" fill="transparent" className="text-slate-100" />
-                                        <circle cx="96" cy="96" r="86" stroke="currentColor" strokeWidth="10" fill="transparent" className="text-indigo-600 transition-all duration-1000" strokeDasharray="540" strokeDashoffset={progress * (540 / 440)} />
-                                    </svg>
-                                    <span className="absolute text-4xl font-black text-slate-900 font-mono tracking-tighter">{formatTime(timeLeft)}</span>
-                                </div>
-                                <div className="space-y-2">
-                                    <p className="font-bold text-slate-900 text-xl tracking-tight">Pomodoro Oturumu</p>
-                                    <p className="text-sm font-medium text-slate-500 bg-slate-50 px-3 py-1 rounded-full">
-                                        {isActive ? 'Odaklanma zamanı...' : 'Başlamaya hazır mısın?'}
-                                    </p>
-                                </div>
-                                <button
-                                    onClick={isActive ? pauseTimer : startTimer}
-                                    className={cn(
-                                        "w-full font-bold py-4 rounded-2xl transition-all shadow-lg active:scale-95 text-base",
-                                        isActive
-                                            ? "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                                            : "bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-200 border-b-4 border-indigo-800"
-                                    )}
-                                >
-                                    {isActive ? 'Duraklat' : 'Zamanlayıcıyı Başlat'}
-                                </button>
                             </div>
                         </div>
                     </div>

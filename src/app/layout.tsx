@@ -12,13 +12,14 @@ export const metadata: Metadata = {
     description: "Next-Level Personal & Business Planner for high productivity.",
 };
 
+
 export default function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="tr" className="dark">
+        <html lang="tr">
             <body className={cn(inter.className, "antialiased min-h-screen")}>
                 <SupabaseProvider>
                     <QueryProvider>

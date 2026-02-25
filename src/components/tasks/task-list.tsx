@@ -1,5 +1,3 @@
-'use client'
-
 import { TaskWithCategory, useTasks } from '@/hooks/use-tasks'
 import { cn } from '@/lib/utils'
 import { Check, Clock, Trash2 } from 'lucide-react'
@@ -20,11 +18,11 @@ export function TaskList() {
                         task.status === 'done' && "bg-slate-50/40"
                     )}
                 >
-                    <div className="flex items-center space-x-5">
+                    <div className="flex items-center space-x-5 flex-1">
                         <button
                             onClick={() => updateTask.mutate({ id: task.id, status: task.status === 'done' ? 'todo' : 'done' })}
                             className={cn(
-                                "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all shadow-sm",
+                                "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all shadow-sm shrink-0",
                                 task.status === 'done'
                                     ? "bg-indigo-600 border-indigo-600 text-white"
                                     : "bg-white border-slate-200 hover:border-indigo-500"
@@ -32,10 +30,10 @@ export function TaskList() {
                         >
                             {task.status === 'done' && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                         </button>
-                        <div>
+                        <div className="flex-1">
                             <h4 className={cn(
                                 "font-bold tracking-tight transition-all",
-                                task.status === 'done' ? "text-slate-400 line-through" : "text-slate-900"
+                                task.status === 'done' ? "text-slate-400 line-through" : "text-slate-900 group-hover:text-indigo-600"
                             )}>
                                 {task.title}
                             </h4>

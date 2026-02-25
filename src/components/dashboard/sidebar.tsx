@@ -1,13 +1,12 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { Calendar, CheckSquare, Focus, LayoutDashboard, Plus, Settings } from 'lucide-react'
+import { Calendar, CheckSquare, LayoutDashboard, Plus, Settings } from 'lucide-react'
 
 const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', id: 'dashboard' },
     { icon: Calendar, label: 'Takvim', id: 'calendar' },
     { icon: CheckSquare, label: 'Görevler', id: 'tasks' },
-    { icon: Focus, label: 'Odak Modu', id: 'focus' },
     { icon: Settings, label: 'Ayarlar', id: 'settings' },
 ]
 
