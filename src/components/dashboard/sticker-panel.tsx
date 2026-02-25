@@ -5,7 +5,9 @@ const STICKERS = ['🎯', '📚', '💻', '🏃', '🍕', '🎨', '✈️', '�
 
 export function StickerPanel() {
     const handleDragStart = (e: React.DragEvent, sticker: string) => {
-        e.dataTransfer.setData('text/plain', `sticker:${sticker}`)
+        e.dataTransfer.effectAllowed = 'copy'
+        e.dataTransfer.setData('text/plain', sticker)
+        e.dataTransfer.setData('application/focusflow-sticker', sticker)
     }
 
     return (

@@ -77,25 +77,25 @@ export function CalendarView({ tasks }: CalendarViewProps) {
                                         draggable
                                         onDragStart={(e) => handleDragStart(e, task.id)}
                                         onDragOver={(e) => {
-                                            const isSticker = e.dataTransfer.types.includes('text/plain')
-                                            if (isSticker) {
-                                                e.preventDefault()
-                                                e.stopPropagation()
-                                                e.currentTarget.classList.add('ring-2', 'ring-indigo-500', 'scale-105')
-                                            }
+                                            e.preventDefault()
+                                            e.stopPropagation()
+                                            e.dataTransfer.dropEffect = 'copy'
+                                            e.currentTarget.classList.add('ring-2', 'ring-indigo-500', 'scale-105')
                                         }}
                                         onDragLeave={(e) => {
                                             e.currentTarget.classList.remove('ring-2', 'ring-indigo-500', 'scale-105')
                                         }}
                                         onDrop={(e) => {
-                                            const data = e.dataTransfer.getData('text/plain')
+                                            e.preventDefault()
+                                            e.stopPropagation()
                                             e.currentTarget.classList.remove('ring-2', 'ring-indigo-500', 'scale-105')
 
-                                            if (data?.startsWith('sticker:')) {
-                                                const sticker = data.split(':')[1]
-                                                e.preventDefault()
-                                                e.stopPropagation()
-                                                updateTask.mutate({ id: task.id, emoji: sticker })
+                                            const sticker = e.dataTransfer.getData('application/focusflow-sticker') ||
+                                                e.dataTransfer.getData('text/plain')
+
+                                            if (sticker && sticker.length <= 10) {
+                                                const finalSticker = sticker.replace('sticker:', '')
+                                                updateTask.mutate({ id: task.id, emoji: finalSticker })
                                             }
                                         }}
                                         className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing group"

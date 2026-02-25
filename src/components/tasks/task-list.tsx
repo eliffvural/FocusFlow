@@ -14,23 +14,25 @@ export function TaskList() {
                 <div
                     key={task.id}
                     onDragOver={(e) => {
-                        const isSticker = e.dataTransfer.types.includes('text/plain')
-                        if (isSticker) {
-                            e.preventDefault()
-                            e.currentTarget.classList.add('bg-indigo-50/50', 'ring-2', 'ring-indigo-500/20')
-                        }
+                        e.preventDefault()
+                        e.stopPropagation()
+                        e.dataTransfer.dropEffect = 'copy'
+                        e.currentTarget.classList.add('bg-indigo-50/50', 'ring-2', 'ring-indigo-500/20')
                     }}
                     onDragLeave={(e) => {
                         e.currentTarget.classList.remove('bg-indigo-50/50', 'ring-2', 'ring-indigo-500/20')
                     }}
                     onDrop={(e) => {
-                        const data = e.dataTransfer.getData('text/plain')
+                        e.preventDefault()
+                        e.stopPropagation()
                         e.currentTarget.classList.remove('bg-indigo-50/50', 'ring-2', 'ring-indigo-500/20')
 
-                        if (data?.startsWith('sticker:')) {
-                            const sticker = data.split(':')[1]
-                            e.preventDefault()
-                            updateTask.mutate({ id: task.id, emoji: sticker })
+                        const sticker = e.dataTransfer.getData('application/focusflow-sticker') ||
+                            e.dataTransfer.getData('text/plain')
+
+                        if (sticker && sticker.length <= 10) {
+                            const finalSticker = sticker.replace('sticker:', '')
+                            updateTask.mutate({ id: task.id, emoji: finalSticker })
                         }
                     }}
                     className={cn(
