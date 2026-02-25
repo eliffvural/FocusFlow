@@ -1,6 +1,5 @@
 'use client'
 
-import { CalendarView } from '@/components/dashboard/calendar-view'
 import { DashboardContent } from '@/components/dashboard/dashboard-content'
 import { useSupabase } from '@/components/providers/supabase-provider'
 import { CreateTaskDialog } from '@/components/tasks/create-task-dialog'
@@ -78,31 +77,34 @@ export default function Home() {
                     <div className="grid grid-cols-1 gap-8 items-start">
                         <div className="space-y-6">
                             <div className="flex items-center justify-between px-1">
-                                <h3 className="text-xl font-bold text-slate-900">Görev Listesi</h3>
-                                <button className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold">Tümünü Yönet</button>
+                                <h3 className="text-xl font-bold text-slate-900">Yaklaşan Görevler</h3>
+                                <button
+                                    onClick={() => onTabChange('tasks')}
+                                    className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold"
+                                >
+                                    Tümünü Yönet
+                                </button>
                             </div>
 
-                            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                                <TaskList />
-                            </div>
+                            <TaskList variant="dashboard" />
                         </div>
                     </div>
                 </div>
-            ) : activeTab === 'calendar' ? (
+            ) : activeTab === 'tasks' ? (
                 <div className="max-w-6xl mx-auto space-y-8 py-4">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h2 className="text-3xl font-bold tracking-tight text-slate-900">Takvim</h2>
-                            <p className="text-slate-500 mt-1">Haftalık planını ve zamanlanmış görevlerini gör.</p>
+                            <h2 className="text-3xl font-bold tracking-tight text-slate-900">Görevlerim</h2>
+                            <p className="text-slate-500 mt-1">Tüm görevlerini zaman skalasına göre takip et.</p>
                         </div>
                         <button
                             onClick={() => setIsDialogOpen(true)}
                             className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-semibold transition-all shadow-md active:scale-95"
                         >
-                            Görev Planla +
+                            Yeni Görev +
                         </button>
                     </div>
-                    <CalendarView tasks={tasks || []} />
+                    <TaskList />
                 </div>
             ) : (
                 <div className="flex flex-col items-center justify-center h-[60vh] text-slate-400">
