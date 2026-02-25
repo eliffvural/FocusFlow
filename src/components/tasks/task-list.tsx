@@ -32,9 +32,10 @@ export function TaskList() {
                         </button>
                         <div className="flex-1">
                             <h4 className={cn(
-                                "font-bold tracking-tight transition-all",
+                                "font-bold tracking-tight transition-all flex items-center gap-2",
                                 task.status === 'done' ? "text-slate-400 line-through" : "text-slate-900 group-hover:text-indigo-600"
                             )}>
+                                {task.emoji && <span className="text-lg">{task.emoji}</span>}
                                 {task.title}
                             </h4>
                             <div className="flex items-center space-x-3 mt-1.5">

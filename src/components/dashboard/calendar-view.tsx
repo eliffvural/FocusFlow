@@ -1,8 +1,8 @@
 'use client'
 
-import { TaskWithCategory } from '@/hooks/use-tasks'
+import { TaskWithCategory, useTasks } from '@/hooks/use-tasks'
 import { cn } from '@/lib/utils'
-import { addDays, format, isSameDay, startOfWeek } from 'date-fns'
+import { addDays, format, isSameDay, set, startOfWeek } from 'date-fns'
 import { tr } from 'date-fns/locale'
 
 interface CalendarViewProps {
@@ -10,9 +10,37 @@ interface CalendarViewProps {
 }
 
 export function CalendarView({ tasks }: CalendarViewProps) {
+    const { updateTask } = useTasks()
     const today = new Date()
     const startDate = startOfWeek(today, { weekStartsOn: 1 })
     const weekDays = Array.from({ length: 7 }).map((_, i) => addDays(startDate, i))
+
+    const handleDragStart = (e: React.DragEvent, taskId: string) => {
+        e.dataTransfer.setData('taskId', taskId)
+    }
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault()
+    }
+
+    const handleDrop = (e: React.DragEvent, dropDate: Date) => {
+        e.preventDefault()
+        const taskId = e.dataTransfer.getData('taskId')
+        const task = tasks.find(t => t.id === taskId)
+
+        if (task && task.start_time) {
+            const originalDate = new Date(task.start_time)
+            const newDate = set(dropDate, {
+                hours: originalDate.getHours(),
+                minutes: originalDate.getMinutes()
+            })
+
+            updateTask.mutate({
+                id: taskId,
+                start_time: newDate.toISOString()
+            })
+        }
+    }
 
     return (
         <div className="space-y-6">
@@ -22,7 +50,12 @@ export function CalendarView({ tasks }: CalendarViewProps) {
                     const isToday = isSameDay(day, today)
 
                     return (
-                        <div key={day.toString()} className="space-y-3">
+                        <div
+                            key={day.toString()}
+                            className="space-y-3"
+                            onDragOver={handleDragOver}
+                            onDrop={(e) => handleDrop(e, day)}
+                        >
                             <div className={cn(
                                 "p-3 rounded-2xl text-center border transition-all",
                                 isToday
@@ -41,7 +74,9 @@ export function CalendarView({ tasks }: CalendarViewProps) {
                                 {dayTasks.map((task) => (
                                     <div
                                         key={task.id}
-                                        className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all cursor-pointer group"
+                                        draggable
+                                        onDragStart={(e) => handleDragStart(e, task.id)}
+                                        className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing group"
                                     >
                                         <div className="flex items-center space-x-2 mb-1">
                                             <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
@@ -49,7 +84,8 @@ export function CalendarView({ tasks }: CalendarViewProps) {
                                                 {task.categories?.name || 'Genel'}
                                             </p>
                                         </div>
-                                        <p className="text-xs font-bold text-slate-800 line-clamp-2 leading-tight">
+                                        <p className="text-xs font-bold text-slate-800 line-clamp-2 leading-tight flex items-center gap-1.5">
+                                            {task.emoji && <span>{task.emoji}</span>}
                                             {task.title}
                                         </p>
                                         <p className="text-[10px] text-slate-400 mt-2 font-medium">

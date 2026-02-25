@@ -63,6 +63,7 @@ export interface Database {
                     end_time: string | null
                     status: 'todo' | 'in_progress' | 'done' | 'not_done'
                     image_url: string | null
+                    emoji: string | null
                     is_reminder_active: boolean
                     created_at: string
                 }

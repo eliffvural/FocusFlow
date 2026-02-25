@@ -3,6 +3,7 @@
 import { Button, Input } from '@/components/ui/base'
 import { useCategories } from '@/hooks/use-categories'
 import { useTasks } from '@/hooks/use-tasks'
+import { cn } from '@/lib/utils'
 import { X } from 'lucide-react'
 import { useState } from 'react'
 
@@ -12,6 +13,7 @@ export function CreateTaskDialog({ isOpen, onClose }: { isOpen: boolean, onClose
     const [categoryId, setCategoryId] = useState('')
     const [startTime, setStartTime] = useState('')
     const [endTime, setEndTime] = useState('')
+    const [emoji, setEmoji] = useState('')
     const { addTask } = useTasks()
     const { categories } = useCategories()
 
@@ -32,13 +34,15 @@ export function CreateTaskDialog({ isOpen, onClose }: { isOpen: boolean, onClose
             category_id: categoryId || null,
             start_time: startTime || null,
             end_time: endTime || null,
+            emoji: emoji || null,
             status: 'todo'
-        })
+        } as any)
         setTitle('')
         setDescription('')
         setCategoryId('')
         setStartTime('')
         setEndTime('')
+        setEmoji('')
         onClose()
     }
 
@@ -109,6 +113,35 @@ export function CreateTaskDialog({ isOpen, onClose }: { isOpen: boolean, onClose
                                 <option key={cat.id} value={cat.id}>{cat.name}</option>
                             ))}
                         </select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-bold text-slate-700 ml-0.5 uppercase tracking-wide">İkon / Emoji</label>
+                        <div className="flex flex-wrap gap-2 p-2 bg-slate-50/50 border border-slate-200 rounded-xl">
+                            {['🎯', '📚', '💻', '🏃', '🍕', '🎨', '✈️', '🏠', '💼', '💡'].map((e) => (
+                                <button
+                                    key={e}
+                                    type="button"
+                                    onClick={() => setEmoji(e)}
+                                    className={cn(
+                                        "w-10 h-10 flex items-center justify-center rounded-lg text-xl transition-all",
+                                        emoji === e ? "bg-indigo-600 shadow-md scale-110" : "hover:bg-white hover:shadow-sm"
+                                    )}
+                                >
+                                    {e}
+                                </button>
+                            ))}
+                            <button
+                                type="button"
+                                onClick={() => setEmoji('')}
+                                className={cn(
+                                    "w-10 h-10 flex items-center justify-center rounded-lg text-xs font-bold text-slate-400 transition-all",
+                                    !emoji ? "bg-slate-200" : "hover:bg-white hover:shadow-sm"
+                                )}
+                            >
+                                Temizle
+                            </button>
+                        </div>
                     </div>
 
                     <div className="pt-2">

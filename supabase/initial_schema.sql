@@ -27,6 +27,7 @@ create table public.tasks (
   end_time timestamp with time zone,
   status text check (status in ('todo', 'in_progress', 'done', 'not_done')) default 'todo',
   image_url text,
+  emoji text,
   is_reminder_active boolean default false,
   created_at timestamp with time zone default timezone('utc'::text, now())
 );
