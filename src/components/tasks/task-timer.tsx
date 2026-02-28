@@ -11,10 +11,19 @@ interface TaskTimerProps {
 }
 
 export function TaskTimer({ task, onClose }: TaskTimerProps) {
-    const [seconds, setSeconds] = useState(25 * 60) // Varsayılan 25 dakika (Pomodoro gibi)
+    const [initialMinutes, setInitialMinutes] = useState(25)
+    const [seconds, setSeconds] = useState(25 * 60)
     const [isActive, setIsActive] = useState(false)
-    const [mode, setMode] = useState<'countdown' | 'timer'>('timer') // İleride geliştirilebilir
     const timerRef = useRef<NodeJS.Timeout | null>(null)
+
+    // Süre değiştiğinde saniyeyi güncelle (eğer timer çalışmıyorsa)
+    const handleMinutesChange = (mins: number) => {
+        if (!isActive) {
+            const cleanMins = Math.max(1, Math.min(180, mins)) // 1 dk ile 3 saat arası
+            setInitialMinutes(cleanMins)
+            setSeconds(cleanMins * 60)
+        }
+    }
 
     useEffect(() => {
         if (isActive && seconds > 0) {
@@ -38,7 +47,7 @@ export function TaskTimer({ task, onClose }: TaskTimerProps) {
 
     const resetTimer = () => {
         setIsActive(false)
-        setSeconds(25 * 60)
+        setSeconds(initialMinutes * 60)
     }
 
     const formatTime = (totalSeconds: number) => {
@@ -47,7 +56,7 @@ export function TaskTimer({ task, onClose }: TaskTimerProps) {
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
     }
 
-    const progress = ((25 * 60 - seconds) / (25 * 60)) * 100
+    const progress = ((initialMinutes * 60 - seconds) / (initialMinutes * 60)) * 100
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
@@ -62,7 +71,7 @@ export function TaskTimer({ task, onClose }: TaskTimerProps) {
                 </button>
 
                 {/* Task Header */}
-                <div className="flex flex-col items-center text-center space-y-4 mb-12">
+                <div className="flex flex-col items-center text-center space-y-4 mb-8">
                     {task.category_id && (
                         <div className="px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">
                             {task.categories?.name}
@@ -71,15 +80,43 @@ export function TaskTimer({ task, onClose }: TaskTimerProps) {
                     <h2 className="text-3xl font-black text-slate-900 tracking-tight max-w-md">
                         {task.title}
                     </h2>
-                    {task.description && (
-                        <p className="text-sm font-medium text-slate-500 max-w-sm line-clamp-2">
-                            {task.description}
-                        </p>
-                    )}
                 </div>
 
-                {/* Timer Circle - Visual Representation */}
-                <div className="relative w-72 h-72 flex items-center justify-center mb-12">
+                {/* Duration Picker (Only visible when not active) */}
+                {!isActive && (
+                    <div className="flex flex-col items-center space-y-4 mb-8 animate-in slide-in-from-top-4 duration-300">
+                        <div className="flex items-center gap-3">
+                            {[15, 25, 45, 60].map((mins) => (
+                                <button
+                                    key={mins}
+                                    onClick={() => handleMinutesChange(mins)}
+                                    className={cn(
+                                        "px-4 py-2 rounded-xl text-xs font-bold transition-all border-2",
+                                        initialMinutes === mins
+                                            ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100"
+                                            : "bg-white border-slate-100 text-slate-500 hover:border-slate-200"
+                                    )}
+                                >
+                                    {mins} dk
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="number"
+                                value={initialMinutes}
+                                onChange={(e) => handleMinutesChange(parseInt(e.target.value) || 0)}
+                                className="w-16 h-10 bg-slate-50 border-2 border-slate-100 rounded-xl text-center font-black text-slate-900 focus:outline-none focus:border-indigo-500 transition-all"
+                                min="1"
+                                max="180"
+                            />
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Dakika Set Et</span>
+                        </div>
+                    </div>
+                )}
+
+                {/* Timer Circle */}
+                <div className={cn("relative w-72 h-72 flex items-center justify-center transition-all duration-500", !isActive && "mt-4")}>
                     <svg className="w-full h-full -rotate-90 transform">
                         <circle
                             cx="144"
@@ -110,13 +147,13 @@ export function TaskTimer({ task, onClose }: TaskTimerProps) {
                         </span>
                         <div className="flex items-center gap-1.5 text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px]">
                             <Clock className="w-3 h-3" />
-                            {isActive ? 'Odaklanılıyor' : 'Duraklatıldı'}
+                            {isActive ? 'Odaklanılıyor' : 'Hazır'}
                         </div>
                     </div>
                 </div>
 
                 {/* Controls */}
-                <div className="flex items-center gap-8">
+                <div className="flex items-center gap-8 mt-12">
                     <button
                         onClick={resetTimer}
                         className="p-5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-all active:scale-90 shadow-sm border border-slate-100"
@@ -140,10 +177,7 @@ export function TaskTimer({ task, onClose }: TaskTimerProps) {
                     <button
                         className="p-5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-full transition-all active:scale-90 shadow-sm border border-slate-100"
                         title="Tamamla"
-                        onClick={() => {
-                            // Görevi tamamla ve kapat (onTaskUpdate hook ile entegre edilebilir)
-                            onClose()
-                        }}
+                        onClick={onClose}
                     >
                         <CheckCircle2 className="w-6 h-6" />
                     </button>
