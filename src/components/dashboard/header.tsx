@@ -1,15 +1,21 @@
 'use client'
 
 import { useSupabase } from '@/components/providers/supabase-provider'
-import { Bell, Search, User } from 'lucide-react'
+import { Bell, Menu, Search, User } from 'lucide-react'
 
-export function Header() {
+export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
     const { user } = useSupabase()
 
     return (
-        <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between">
-            <div className="flex-1 flex items-center">
-                <div className="relative w-full max-w-md">
+        <header className="h-16 bg-white border-b border-slate-200 px-4 md:px-8 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-4 flex-1">
+                <button
+                    onClick={onMenuClick}
+                    className="p-2 -ml-2 text-slate-500 hover:bg-slate-50 rounded-lg md:hidden"
+                >
+                    <Menu className="w-6 h-6" />
+                </button>
+                <div className="relative w-full max-w-md hidden sm:block">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input
                         type="text"

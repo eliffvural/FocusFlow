@@ -61,7 +61,7 @@ export function AuthForm({ type }: AuthFormProps) {
     }
 
     return (
-        <div className="w-full max-w-md space-y-8 bg-white p-10 rounded-3xl border border-slate-200 shadow-xl">
+        <div className="w-full max-w-md space-y-8 bg-white p-6 md:p-10 rounded-3xl border border-slate-200 shadow-xl mx-4">
             <div className="space-y-2 text-center">
                 <h1 className="text-3xl font-bold tracking-tight text-slate-900">
                     {type === 'login' ? 'Tekrar Hoş Geldiniz' : 'Hesap Oluşturun'}

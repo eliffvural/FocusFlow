@@ -7,8 +7,13 @@ export async function GET(request: Request) {
     const code = requestUrl.searchParams.get('code')
 
     if (code) {
-        const supabase = createRouteHandlerClient({ cookies })
-        await supabase.auth.exchangeCodeForSession(code)
+        try {
+            const supabase = createRouteHandlerClient({ cookies })
+            await supabase.auth.exchangeCodeForSession(code)
+        } catch (error) {
+            console.error('Auth error:', error)
+            // Hata durumunda da ana sayfaya veya bir hata sayfasına yönlendirilebilir
+        }
     }
 
     // URL'yi ana sayfaya yönlendir

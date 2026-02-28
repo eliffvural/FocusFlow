@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { Calendar, CheckSquare, LayoutDashboard, LogOut, Plus, Settings } from 'lucide-react'
+import { Calendar, CheckSquare, LayoutDashboard, LogOut, Plus, Settings, X } from 'lucide-react'
 import { useSupabase } from '../providers/supabase-provider'
 import { StickerPanel } from './sticker-panel'
 
@@ -15,9 +15,11 @@ const menuItems = [
 interface SidebarProps {
     activeTab: string
     onTabChange: (id: string) => void
+    isOpen?: boolean
+    onClose?: () => void
 }
 
-export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
+export function Sidebar({ activeTab, onTabChange, isOpen, onClose }: SidebarProps) {
     const { supabase } = useSupabase()
 
     const handleLogout = async () => {
@@ -25,12 +27,23 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
     }
 
     return (
-        <div className="w-64 h-full bg-white border-r border-slate-200 flex flex-col p-4 space-y-8">
-            <div className="flex items-center space-x-2 px-2">
-                <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold">F</span>
+        <div className={cn(
+            "fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-200 flex flex-col p-4 space-y-8 transition-transform duration-300 transform md:relative md:translate-x-0 md:z-0",
+            isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
+        )}>
+            <div className="flex items-center justify-between px-2">
+                <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                        <span className="text-white font-bold">F</span>
+                    </div>
+                    <span className="text-xl font-bold tracking-tight text-slate-900">FocusFlow</span>
                 </div>
-                <span className="text-xl font-bold tracking-tight text-slate-900">FocusFlow</span>
+                <button
+                    onClick={onClose}
+                    className="p-2 text-slate-400 hover:bg-slate-50 rounded-lg md:hidden"
+                >
+                    <X className="w-5 h-5" />
+                </button>
             </div>
 
             <nav className="flex-1 space-y-1">
