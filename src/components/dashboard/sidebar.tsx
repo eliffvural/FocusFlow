@@ -1,7 +1,8 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { Calendar, CheckSquare, LayoutDashboard, Plus, Settings } from 'lucide-react'
+import { Calendar, CheckSquare, LayoutDashboard, LogOut, Plus, Settings } from 'lucide-react'
+import { useSupabase } from '../providers/supabase-provider'
 import { StickerPanel } from './sticker-panel'
 
 const menuItems = [
@@ -17,6 +18,12 @@ interface SidebarProps {
 }
 
 export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
+    const { supabase } = useSupabase()
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut()
+    }
+
     return (
         <div className="w-64 h-full bg-white border-r border-slate-200 flex flex-col p-4 space-y-8">
             <div className="flex items-center space-x-2 px-2">
@@ -46,7 +53,15 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
 
             <StickerPanel />
 
-            <div className="mt-auto px-2">
+            <div className="mt-auto px-2 space-y-4">
+                <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-red-500 hover:bg-red-50 transition-all font-medium"
+                >
+                    <LogOut className="w-5 h-5" />
+                    <span>Çıkış Yap</span>
+                </button>
+
                 <div className="bg-slate-900 rounded-xl p-4 shadow-sm">
                     <p className="text-xs text-slate-400 font-medium mb-1">Yeni Plan</p>
                     <p className="text-sm text-white font-bold mb-3">Verimliliğini artır</p>
