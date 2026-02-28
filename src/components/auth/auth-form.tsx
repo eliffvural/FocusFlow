@@ -52,12 +52,19 @@ export function AuthForm({ type }: AuthFormProps) {
     }
 
     const handleGoogleLogin = async () => {
-        await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: `${window.location.origin}/auth/callback`,
-            },
-        })
+        try {
+            setLoading(true)
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: `${window.location.origin}/auth/callback`,
+                },
+            })
+            if (error) throw error
+        } catch (err: any) {
+            setError(err.message)
+            setLoading(false)
+        }
     }
 
     return (
@@ -124,8 +131,8 @@ export function AuthForm({ type }: AuthFormProps) {
                 </div>
             </div>
 
-            <Button variant="outline" className="w-full h-12 rounded-xl border-slate-200 text-slate-700 hover:bg-slate-50 font-bold shadow-sm" onClick={handleGoogleLogin}>
-                Google ile Devam Et
+            <Button variant="outline" className="w-full h-12 rounded-xl border-slate-200 text-slate-700 hover:bg-slate-50 font-bold shadow-sm" onClick={handleGoogleLogin} disabled={loading}>
+                {loading ? 'Yükleniyor...' : 'Google ile Devam Et'}
             </Button>
 
             <p className="text-center text-sm font-medium text-slate-500">
