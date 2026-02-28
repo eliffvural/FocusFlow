@@ -90,12 +90,20 @@ export function CalendarView({ tasks }: CalendarViewProps) {
                                             e.stopPropagation()
                                             e.currentTarget.classList.remove('ring-2', 'ring-indigo-500', 'scale-105')
 
-                                            const sticker = e.dataTransfer.getData('application/focusflow-sticker') ||
-                                                e.dataTransfer.getData('text/plain')
+                                            const data = e.dataTransfer.getData('text/plain')
+                                            const customData = e.dataTransfer.getData('application/x-focusflow-sticker')
 
-                                            if (sticker && sticker.length <= 10) {
-                                                const finalSticker = sticker.replace('sticker:', '')
-                                                updateTask.mutate({ id: task.id, emoji: finalSticker })
+                                            let sticker = ''
+                                            if (customData) {
+                                                sticker = customData
+                                            } else if (data && data.startsWith('FF_STICKER:')) {
+                                                sticker = data.split('FF_STICKER:')[1]
+                                            } else if (data && data.length <= 4) {
+                                                sticker = data
+                                            }
+
+                                            if (sticker) {
+                                                updateTask.mutate({ id: task.id, emoji: sticker })
                                             }
                                         }}
                                         className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing group"
@@ -110,6 +118,11 @@ export function CalendarView({ tasks }: CalendarViewProps) {
                                             {task.emoji && <span>{task.emoji}</span>}
                                             {task.title}
                                         </p>
+                                        {task.description && (
+                                            <p className="text-[9px] text-slate-400 mt-1 line-clamp-1 italic">
+                                                {task.description}
+                                            </p>
+                                        )}
                                         <p className="text-[10px] text-slate-400 mt-2 font-medium">
                                             {task.start_time && format(new Date(task.start_time), 'HH:mm')}
                                         </p>

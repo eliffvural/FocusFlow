@@ -2,9 +2,16 @@ import { TaskWithCategory, useTasks } from '@/hooks/use-tasks'
 import { cn } from '@/lib/utils'
 import { isThisMonth, isThisWeek, isToday, parseISO, startOfDay } from 'date-fns'
 import { Calendar as CalendarIcon, Check, Clock, Trash2 } from 'lucide-react'
+import { useState } from 'react'
+import { TaskTimer } from './task-timer'
 
-export function TaskList() {
+interface TaskListProps {
+    variant?: 'full' | 'dashboard'
+}
+
+export function TaskList({ variant = 'full' }: TaskListProps) {
     const { tasks, isLoading, updateTask, deleteTask } = useTasks()
+    const [selectedTaskForTimer, setSelectedTaskForTimer] = useState<TaskWithCategory | null>(null)
 
     if (isLoading) return <div className="text-slate-500 p-8 text-center font-medium">Görevler yükleniyor...</div>
     if (!tasks?.length) return <div className="text-slate-500 p-12 text-center font-medium">Henüz hiç görev yok. Hadi bir tane ekleyelim!</div>
@@ -29,17 +36,22 @@ export function TaskList() {
         if (groupTasks.length === 0) return null
 
         return (
-            <div className="mb-8 last:mb-0">
+            <div className={cn(variant === 'full' ? "mb-8 last:mb-0" : "mb-6 last:mb-0 px-4 pt-4")}>
                 <div className="flex items-center gap-2 mb-4 px-2">
                     <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
                         {icon}
                     </div>
                     <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.2em]">{title}</h3>
                     <span className="ml-auto text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">
-                        {groupTasks.length} GÖREV
+                        {groupTasks.length}
                     </span>
                 </div>
-                <div className="bg-white rounded-3xl border border-slate-100 shadow-sm divide-y divide-slate-50 overflow-hidden">
+                <div className={cn(
+                    "divide-y divide-slate-50 overflow-hidden",
+                    variant === 'full'
+                        ? "bg-white rounded-3xl border border-slate-100 shadow-sm"
+                        : "bg-slate-50/50 rounded-2xl border border-slate-100"
+                )}>
                     {groupTasks.map((task) => (
                         <div
                             key={task.id}
@@ -66,55 +78,67 @@ export function TaskList() {
                                 }
                             }}
                             className={cn(
-                                "p-5 flex items-center justify-between transition-all group hover:bg-slate-50/80 border-l-4 border-transparent",
-                                task.status === 'done' ? "bg-slate-50/40" : "hover:border-indigo-500"
+                                "p-4 flex items-center justify-between transition-all group hover:bg-white border-l-4 border-transparent",
+                                task.status === 'done' ? "opacity-60" : "hover:border-indigo-500 cursor-pointer"
                             )}
+                            onClick={() => {
+                                if (task.status !== 'done') {
+                                    setSelectedTaskForTimer(task)
+                                }
+                            }}
                         >
-                            <div className="flex items-center space-x-5 flex-1">
+                            <div className="flex items-center space-x-4 flex-1">
                                 <button
-                                    onClick={() => updateTask.mutate({ id: task.id, status: task.status === 'done' ? 'todo' : 'done' })}
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        updateTask.mutate({ id: task.id, status: task.status === 'done' ? 'todo' : 'done' })
+                                    }}
                                     className={cn(
-                                        "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all shadow-sm shrink-0",
+                                        "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all shadow-sm shrink-0",
                                         task.status === 'done'
                                             ? "bg-indigo-600 border-indigo-600 text-white"
                                             : "bg-white border-slate-200 hover:border-indigo-500"
                                     )}
                                 >
-                                    {task.status === 'done' && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                                    {task.status === 'done' && <Check className="w-3 h-3 stroke-[3]" />}
                                 </button>
                                 <div className="flex-1">
                                     <h4 className={cn(
-                                        "font-bold tracking-tight transition-all flex items-center gap-2",
+                                        "text-sm font-bold tracking-tight transition-all flex items-center gap-2",
                                         task.status === 'done' ? "text-slate-400 line-through" : "text-slate-900 group-hover:text-indigo-600"
                                     )}>
-                                        {task.emoji && <span className="text-lg">{task.emoji}</span>}
+                                        {task.emoji && <span className="text-base">{task.emoji}</span>}
                                         {task.title}
                                     </h4>
-                                    <div className="flex items-center space-x-3 mt-1.5">
+                                    {task.description && (
+                                        <p className="text-xs text-slate-500 mt-0.5 line-clamp-1 font-medium">
+                                            {task.description}
+                                        </p>
+                                    )}
+                                    <div className="flex items-center space-x-2.5 mt-1">
                                         <span className="flex items-center space-x-1 text-slate-400">
-                                            <Clock className="w-3.5 h-3.5" />
-                                            <p className="text-xs font-medium">
-                                                {task.start_time ? new Date(task.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Zaman belirlenmedi'}
+                                            <p className="text-[10px] font-bold">
+                                                {task.start_time ? new Date(task.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Zaman yok'}
                                             </p>
                                         </span>
                                         {task.category_id && (
-                                            <span className="w-1 h-1 rounded-full bg-slate-300" />
+                                            <span className="text-[10px] font-black text-indigo-600/60 uppercase tracking-widest bg-indigo-50/50 px-1.5 py-0.5 rounded">
+                                                {task.categories?.name}
+                                            </span>
                                         )}
-                                        <span className="text-xs font-semibold text-indigo-600/70 uppercase tracking-wider">
-                                            {task.categories?.name}
-                                        </span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="flex items-center space-x-4">
-                                <button
-                                    onClick={() => deleteTask.mutate(task.id)}
-                                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                                >
-                                    <Trash2 className="w-4.5 h-4.5" />
-                                </button>
-                            </div>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    deleteTask.mutate(task.id)
+                                }}
+                                className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                            </button>
                         </div>
                     ))}
                 </div>
@@ -123,11 +147,28 @@ export function TaskList() {
     }
 
     return (
-        <div className="max-w-5xl mx-auto pb-12">
+        <div className={cn(variant === 'full' ? "max-w-5xl mx-auto pb-12" : "pb-4")}>
             {renderTaskGroup("Bugün", groups.today, <Clock className="w-4 h-4" />)}
             {renderTaskGroup("Bu Hafta", groups.thisWeek, <CalendarIcon className="w-4 h-4" />)}
-            {renderTaskGroup("Bu Ay", groups.thisMonth, <CalendarIcon className="w-4 h-4" />)}
-            {renderTaskGroup("Daha Sonra / Belirsiz", groups.later, <CalendarIcon className="w-4 h-4" />)}
+            {variant === 'full' && (
+                <>
+                    {renderTaskGroup("Bu Ay", groups.thisMonth, <CalendarIcon className="w-4 h-4" />)}
+                    {renderTaskGroup("Diğer", groups.later, <CalendarIcon className="w-4 h-4" />)}
+                </>
+            )}
+            {variant === 'dashboard' && groups.today.length === 0 && groups.thisWeek.length === 0 && (
+                <div className="p-12 text-center text-slate-400">
+                    <p className="text-sm font-bold uppercase tracking-widest">Harika!</p>
+                    <p className="text-xs mt-1">Bu dönem için beklemede olan bir görevin yok.</p>
+                </div>
+            )}
+
+            {selectedTaskForTimer && (
+                <TaskTimer
+                    task={selectedTaskForTimer}
+                    onClose={() => setSelectedTaskForTimer(null)}
+                />
+            )}
         </div>
     )
 }

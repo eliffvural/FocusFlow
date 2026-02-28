@@ -1,6 +1,8 @@
 'use client'
 
+import { CalendarView } from '@/components/dashboard/calendar-view'
 import { DashboardContent } from '@/components/dashboard/dashboard-content'
+import { StickyNoteBoard } from '@/components/dashboard/sticky-note-board'
 import { useSupabase } from '@/components/providers/supabase-provider'
 import { CreateTaskDialog } from '@/components/tasks/create-task-dialog'
 import { TaskList } from '@/components/tasks/task-list'
@@ -79,7 +81,7 @@ export default function Home() {
                             <div className="flex items-center justify-between px-1">
                                 <h3 className="text-xl font-bold text-slate-900">Yaklaşan Görevler</h3>
                                 <button
-                                    onClick={() => onTabChange('tasks')}
+                                    onClick={() => setActiveTab('tasks')}
                                     className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold"
                                 >
                                     Tümünü Yönet
@@ -88,7 +90,27 @@ export default function Home() {
 
                             <TaskList variant="dashboard" />
                         </div>
+
+                        <div className="pt-4 border-t border-slate-100">
+                            <StickyNoteBoard />
+                        </div>
                     </div>
+                </div>
+            ) : activeTab === 'calendar' ? (
+                <div className="max-w-6xl mx-auto space-y-8 py-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h2 className="text-3xl font-bold tracking-tight text-slate-900">Takvim</h2>
+                            <p className="text-slate-500 mt-1">Haftalık planını ve zamanlanmış görevlerini gör.</p>
+                        </div>
+                        <button
+                            onClick={() => setIsDialogOpen(true)}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-semibold transition-all shadow-md active:scale-95"
+                        >
+                            Görev Planla +
+                        </button>
+                    </div>
+                    <CalendarView tasks={tasks || []} />
                 </div>
             ) : activeTab === 'tasks' ? (
                 <div className="max-w-6xl mx-auto space-y-8 py-4">
@@ -104,7 +126,7 @@ export default function Home() {
                             Yeni Görev +
                         </button>
                     </div>
-                    <TaskList />
+                    <TaskList variant="full" />
                 </div>
             ) : (
                 <div className="flex flex-col items-center justify-center h-[60vh] text-slate-400">
