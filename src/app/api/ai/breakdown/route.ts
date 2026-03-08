@@ -24,7 +24,7 @@ export async function POST(req: Request) {
 
         // 2. Modeli Seç (Gemini 1.5 Flash en hızlısıdır)
         const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash",
+            model: "gemini-2.5-flash",
             generationConfig: {
                 responseMimeType: "application/json",
                 responseSchema: schema,
