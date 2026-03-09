@@ -64,21 +64,27 @@ export function TaskList({ variant = 'full' }: TaskListProps) {
         }
     }
 
-    const addAISubtasks = (taskId: string, suggestions: string[]) => {
+    const addAISubtasks = async (taskId: string, suggestions: string[]) => {
         const parentTask = tasks?.find(t => t.id === taskId)
         if (!user) return
 
-        suggestions.forEach(title => {
-            addTask.mutate({
-                title,
-                user_id: user.id,
-                category_id: parentTask?.category_id || null,
-                start_time: parentTask?.start_time || null,
-                status: 'todo',
-                parent_id: taskId
-            })
-        })
-        setAiSuggestions(null)
+        try {
+            // Sıralı ve güvenli kayıt için async/await kullanıyoruz
+            for (const title of suggestions) {
+                await addTask.mutateAsync({
+                    title,
+                    user_id: user.id,
+                    category_id: parentTask?.category_id || null,
+                    start_time: parentTask?.start_time || null,
+                    status: 'todo',
+                    parent_id: taskId
+                })
+            }
+            setAiSuggestions(null)
+        } catch (error) {
+            console.error('Alt görevler eklenirken hata oluştu:', error)
+            alert('Bazı alt görevler eklenemedi. Lütfen tekrar deneyin.')
+        }
     }
 
     const renderTaskGroup = (title: string, groupTasks: TaskWithCategory[], icon: React.ReactNode) => {
@@ -221,45 +227,53 @@ export function TaskList({ variant = 'full' }: TaskListProps) {
 
                                 {/* Subtasks Rendering */}
                                 {subtasks.length > 0 && (
-                                    <div className="ml-12 border-l-2 border-slate-100 mb-2">
-                                        {subtasks.map((subtask) => (
-                                            <div
-                                                key={subtask.id}
-                                                className="p-3 pl-6 flex items-center justify-between transition-all group/sub hover:bg-slate-50/50 rounded-r-xl"
-                                            >
-                                                <div className="flex items-center space-x-3 flex-1">
+                                    <div className="ml-10 mb-4 pr-4">
+                                        <div className="space-y-1 border-l-2 border-slate-100 pl-4 py-1">
+                                            {subtasks.map((subtask) => (
+                                                <div
+                                                    key={subtask.id}
+                                                    className={cn(
+                                                        "p-2.5 flex items-center justify-between transition-all group/sub rounded-xl border border-transparent hover:border-slate-100",
+                                                        subtask.status === 'done' ? "bg-slate-50/30 opacity-60" : "bg-slate-50/70 hover:bg-white active:scale-[0.98]"
+                                                    )}
+                                                >
+                                                    <div className="flex items-center space-x-3 flex-1">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
+                                                                updateTask.mutate({ id: subtask.id, status: subtask.status === 'done' ? 'todo' : 'done' })
+                                                            }}
+                                                            className={cn(
+                                                                "w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all bg-white shrink-0",
+                                                                subtask.status === 'done'
+                                                                    ? "bg-indigo-600 border-indigo-600 text-white"
+                                                                    : "border-slate-200 hover:border-indigo-500"
+                                                            )}
+                                                        >
+                                                            {subtask.status === 'done' && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                                                        </button>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[8px] font-black bg-indigo-100 text-indigo-600 px-1 py-0.5 rounded leading-none uppercase tracking-tighter shrink-0">ALT</span>
+                                                            <h5 className={cn(
+                                                                "text-xs font-bold tracking-tight",
+                                                                subtask.status === 'done' ? "text-slate-400 line-through" : "text-slate-700"
+                                                            )}>
+                                                                {subtask.title}
+                                                            </h5>
+                                                        </div>
+                                                    </div>
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation()
-                                                            updateTask.mutate({ id: subtask.id, status: subtask.status === 'done' ? 'todo' : 'done' })
+                                                            deleteTask.mutate(subtask.id)
                                                         }}
-                                                        className={cn(
-                                                            "w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all bg-white shrink-0",
-                                                            subtask.status === 'done'
-                                                                ? "bg-indigo-600 border-indigo-600 text-white"
-                                                                : "border-slate-200 hover:border-indigo-500"
-                                                        )}
+                                                        className="opacity-0 group-hover/sub:opacity-100 p-1 text-slate-400 hover:text-red-500 transition-all"
                                                     >
-                                                        {subtask.status === 'done' && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                                                        <Trash2 className="w-3.5 h-3.5" />
                                                     </button>
-                                                    <h5 className={cn(
-                                                        "text-xs font-bold tracking-tight",
-                                                        subtask.status === 'done' ? "text-slate-400 line-through" : "text-slate-700"
-                                                    )}>
-                                                        {subtask.title}
-                                                    </h5>
                                                 </div>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        deleteTask.mutate(subtask.id)
-                                                    }}
-                                                    className="opacity-0 group-hover/sub:opacity-100 p-1 text-slate-400 hover:text-red-500 transition-all"
-                                                >
-                                                    <Trash2 className="w-3.5 h-3.5" />
-                                                </button>
-                                            </div>
-                                        ))}
+                                            ))}
+                                        </div>
                                     </div>
                                 )}
 
@@ -294,7 +308,7 @@ export function TaskList({ variant = 'full' }: TaskListProps) {
                                                 }}
                                                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase tracking-widest py-2 rounded-xl transition-all shadow-lg shadow-indigo-100 border-b-2 border-indigo-800"
                                             >
-                                                Hepsini Alt Görev Olarak Ekle
+                                                Seçilenleri Alt Görev Olarak Ekle
                                             </button>
                                         </div>
                                     </div>
