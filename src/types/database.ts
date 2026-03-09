@@ -65,6 +65,7 @@ export interface Database {
                     image_url: string | null
                     emoji: string | null
                     is_reminder_active: boolean
+                    parent_id: string | null
                     created_at: string
                 }
                 Insert: {

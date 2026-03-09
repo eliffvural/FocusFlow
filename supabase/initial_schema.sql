@@ -29,6 +29,7 @@ create table public.tasks (
   image_url text,
   emoji text,
   is_reminder_active boolean default false,
+  parent_id uuid references public.tasks(id) on delete cascade,
   created_at timestamp with time zone default timezone('utc'::text, now())
 );
 
