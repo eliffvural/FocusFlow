@@ -79,6 +79,7 @@ export interface Database {
                     status?: 'todo' | 'in_progress' | 'done' | 'not_done'
                     image_url?: string | null
                     is_reminder_active?: boolean
+                    parent_id?: string | null
                     created_at?: string
                 }
                 Update: {
@@ -92,6 +93,7 @@ export interface Database {
                     status?: 'todo' | 'in_progress' | 'done' | 'not_done'
                     image_url?: string | null
                     is_reminder_active?: boolean
+                    parent_id?: string | null
                     created_at?: string
                 }
             }

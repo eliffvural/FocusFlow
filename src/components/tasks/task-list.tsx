@@ -73,7 +73,7 @@ export function TaskList({ variant = 'full' }: TaskListProps) {
                 title,
                 user_id: user.id,
                 category_id: parentTask?.category_id || null,
-                start_time: parentTask?.start_time || new Date().toISOString(),
+                start_time: parentTask?.start_time || null,
                 status: 'todo',
                 parent_id: taskId
             })
@@ -104,7 +104,7 @@ export function TaskList({ variant = 'full' }: TaskListProps) {
                         : "bg-slate-50/50 rounded-2xl border border-slate-100"
                 )}>
                     {mainTasks.map((task) => {
-                        const subtasks = groupTasks.filter(st => st.parent_id === task.id)
+                        const subtasks = tasks?.filter(st => st.parent_id === task.id) || []
 
                         return (
                             <div key={task.id}>

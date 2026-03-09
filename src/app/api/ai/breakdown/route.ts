@@ -2,7 +2,7 @@ import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
 
 // 1. API İstemcisini Yapılandır
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+// (Burası artık boş, genAI POST içinde oluşturuluyor)
 
 // JSON formatını zorlamak için bir şema (Schema) tanımlıyoruz
 // Bu sayede modelin hata yapma şansı kalmıyor
@@ -18,11 +18,14 @@ export async function POST(req: Request) {
     try {
         const { title } = await req.json();
 
-        if (!process.env.GEMINI_API_KEY) {
-            return NextResponse.json({ error: 'API Key eksik!' }, { status: 500 });
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+            console.error("HATA: GEMINI_API_KEY tanımsız!");
+            return NextResponse.json({ error: 'API Key eksik! Lütfen .env.local dosyasını kontrol edin.' }, { status: 500 });
         }
 
-        // 2. Modeli Seç (Gemini 1.5 Flash en hızlısıdır)
+        // Modeli her istekte yeniden yapılandırıyoruz (Hata payını azaltmak için)
+        const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({
             model: "gemini-1.5-flash",
             generationConfig: {
@@ -38,7 +41,10 @@ export async function POST(req: Request) {
         const response = await result.response;
         const text = response.text();
 
-        // Model zaten saf JSON döndüreceği için direkt parse edebiliriz
+        if (!text) {
+            throw new Error("Modelden boş yanıt döndü.");
+        }
+
         const subtasks = JSON.parse(text);
 
         return NextResponse.json({ subtasks });
