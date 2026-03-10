@@ -15,7 +15,7 @@ export function TaskList({ variant = 'full' }: TaskListProps) {
     const { tasks, isLoading, addTask, updateTask, deleteTask } = useTasks()
     const [selectedTaskForTimer, setSelectedTaskForTimer] = useState<TaskWithCategory | null>(null)
     const [aiTaskLoading, setAiTaskLoading] = useState<string | null>(null)
-    const [aiSuggestions, setAiSuggestions] = useState<{ taskId: string, suggestions: string[] } | null>(null)
+    const [aiSuggestions, setAiSuggestions] = useState<{ taskId: string, suggestions: { title: string, duration: number }[] } | null>(null)
     const [selectedSuggestions, setSelectedSuggestions] = useState<number[]>([])
 
     if (isLoading) return <div className="text-slate-500 p-8 text-center font-medium">Görevler yükleniyor...</div>
@@ -74,16 +74,19 @@ export function TaskList({ variant = 'full' }: TaskListProps) {
         )
     }
 
-    const addAISubtasks = async (taskId: string, suggestions: string[]) => {
+    const addAISubtasks = async (taskId: string, suggestions: { title: string, duration: number }[]) => {
         const parentTask = tasks?.find(t => t.id === taskId)
         if (!user || selectedSuggestions.length === 0) return
 
         try {
-            const selectedTitles = suggestions.filter((_, idx) => selectedSuggestions.includes(idx))
+            const selectedItems = suggestions.filter((_, idx) => selectedSuggestions.includes(idx))
             // Sıralı ve güvenli kayıt için async/await kullanıyoruz
-            for (const title of selectedTitles) {
+            for (const item of selectedItems) {
+                // Eğer ana görevin start_time'ı varsa süre ekleyerek end_time hesaplayabiliriz
+                // Ama şimdilik sadece duration/description kısmına ekleyelim veya tasarımı koruyalım
                 await addTask.mutateAsync({
-                    title,
+                    title: item.title,
+                    description: `Tahmini süre: ${item.duration} dakika`,
                     user_id: user.id,
                     category_id: parentTask?.category_id || null,
                     start_time: parentTask?.start_time || null,
@@ -327,12 +330,21 @@ export function TaskList({ variant = 'full' }: TaskListProps) {
                                                             )}>
                                                                 {isSelected && <Check className="w-3 h-3 stroke-[4]" />}
                                                             </div>
-                                                            <p className={cn(
-                                                                "text-xs font-bold leading-relaxed",
-                                                                isSelected ? "text-white" : "text-slate-700"
-                                                            )}>
-                                                                {suggestion}
-                                                            </p>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className={cn(
+                                                                    "text-xs font-bold leading-relaxed truncate",
+                                                                    isSelected ? "text-white" : "text-slate-700"
+                                                                )}>
+                                                                    {suggestion.title}
+                                                                </p>
+                                                                <div className={cn(
+                                                                    "flex items-center gap-1 mt-0.5",
+                                                                    isSelected ? "text-white/70" : "text-slate-400"
+                                                                )}>
+                                                                    <Clock className="w-2.5 h-2.5" />
+                                                                    <span className="text-[10px] font-bold">{suggestion.duration} dk</span>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     );
                                                 })}

@@ -7,10 +7,15 @@ import { NextResponse } from 'next/server';
 // JSON formatını zorlamak için bir şema (Schema) tanımlıyoruz
 // Bu sayede modelin hata yapma şansı kalmıyor
 const schema = {
-    description: "Alt görevler listesi",
+    description: "Alt görevler listesi ve tahmini süreleri",
     type: SchemaType.ARRAY,
     items: {
-        type: SchemaType.STRING,
+        type: SchemaType.OBJECT,
+        properties: {
+            title: { type: SchemaType.STRING },
+            duration: { type: SchemaType.NUMBER, description: "Dakika cinsinden süre" }
+        },
+        required: ["title", "duration"]
     },
 };
 
@@ -34,7 +39,7 @@ export async function POST(req: Request) {
             },
         });
 
-        const prompt = `Şu ana görevi 5 mantıklı alt göreve böl: ${title}`;
+        const prompt = `Şu ana görevi 5 mantıklı alt göreve böl ve her biri için tahmini bir süre (dakika cinsinden) öner: ${title}`;
         console.log("AI Breakdown Prompt:", prompt);
 
         // 3. Yanıtı Al
