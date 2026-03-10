@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server';
 
 // JSON formatını zorlamak için bir şema (Schema) tanımlıyoruz
 // Bu sayede modelin hata yapma şansı kalmıyor
-const schema = {
+const schema: any = {
     description: "Alt görevler listesi ve tahmini süreleri",
     type: SchemaType.ARRAY,
     items: {
