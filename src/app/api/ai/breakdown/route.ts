@@ -34,7 +34,7 @@ export async function POST(req: Request) {
             },
         });
 
-        const prompt = `Şu ana görevi 3 mantıklı alt göreve böl: ${title}`;
+        const prompt = `Şu ana görevi 5 mantıklı alt göreve böl: ${title}`;
         console.log("AI Breakdown Prompt:", prompt);
 
         // 3. Yanıtı Al

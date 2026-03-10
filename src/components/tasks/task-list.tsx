@@ -16,6 +16,7 @@ export function TaskList({ variant = 'full' }: TaskListProps) {
     const [selectedTaskForTimer, setSelectedTaskForTimer] = useState<TaskWithCategory | null>(null)
     const [aiTaskLoading, setAiTaskLoading] = useState<string | null>(null)
     const [aiSuggestions, setAiSuggestions] = useState<{ taskId: string, suggestions: string[] } | null>(null)
+    const [selectedSuggestions, setSelectedSuggestions] = useState<number[]>([])
 
     if (isLoading) return <div className="text-slate-500 p-8 text-center font-medium">Görevler yükleniyor...</div>
     if (!tasks?.length) return <div className="text-slate-500 p-12 text-center font-medium">Henüz hiç görev yok. Hadi bir tane ekleyelim!</div>
@@ -61,16 +62,26 @@ export function TaskList({ variant = 'full' }: TaskListProps) {
             alert('Hata: ' + error.message + (error.details ? '\nDetay: ' + error.details : ''))
         } finally {
             setAiTaskLoading(null)
+            setSelectedSuggestions([]) // Reset selections when new breakdown starts
         }
+    }
+
+    const toggleSuggestion = (index: number) => {
+        setSelectedSuggestions(prev =>
+            prev.includes(index)
+                ? prev.filter(i => i !== index)
+                : [...prev, index]
+        )
     }
 
     const addAISubtasks = async (taskId: string, suggestions: string[]) => {
         const parentTask = tasks?.find(t => t.id === taskId)
-        if (!user) return
+        if (!user || selectedSuggestions.length === 0) return
 
         try {
+            const selectedTitles = suggestions.filter((_, idx) => selectedSuggestions.includes(idx))
             // Sıralı ve güvenli kayıt için async/await kullanıyoruz
-            for (const title of suggestions) {
+            for (const title of selectedTitles) {
                 await addTask.mutateAsync({
                     title,
                     user_id: user.id,
@@ -81,6 +92,7 @@ export function TaskList({ variant = 'full' }: TaskListProps) {
                 })
             }
             setAiSuggestions(null)
+            setSelectedSuggestions([])
         } catch (error: any) {
             console.error('Alt görevler eklenirken hata oluştu:', error)
             alert('Bazı alt görevler eklenemedi. Lütfen tekrar deneyin.\nHata: ' + (error.message || 'Bilinmeyen hata'))
@@ -294,21 +306,53 @@ export function TaskList({ variant = 'full' }: TaskListProps) {
                                                 </button>
                                             </div>
                                             <div className="space-y-2 mb-4">
-                                                {aiSuggestions.suggestions.map((suggestion, idx) => (
-                                                    <div key={idx} className="flex items-start gap-2 bg-white/80 p-2.5 rounded-xl border border-white shadow-sm">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0" />
-                                                        <p className="text-xs font-bold text-slate-700 leading-relaxed">{suggestion}</p>
-                                                    </div>
-                                                ))}
+                                                {aiSuggestions.suggestions.map((suggestion, idx) => {
+                                                    const isSelected = selectedSuggestions.includes(idx);
+                                                    return (
+                                                        <div
+                                                            key={idx}
+                                                            onClick={() => toggleSuggestion(idx)}
+                                                            className={cn(
+                                                                "flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer",
+                                                                isSelected
+                                                                    ? "bg-indigo-600 border-indigo-700 shadow-sm"
+                                                                    : "bg-white/80 border-white hover:border-indigo-200"
+                                                            )}
+                                                        >
+                                                            <div className={cn(
+                                                                "w-4 h-4 rounded-md border flex items-center justify-center mt-0.5 transition-all shrink-0",
+                                                                isSelected
+                                                                    ? "bg-white border-white text-indigo-600"
+                                                                    : "bg-slate-50 border-slate-200"
+                                                            )}>
+                                                                {isSelected && <Check className="w-3 h-3 stroke-[4]" />}
+                                                            </div>
+                                                            <p className={cn(
+                                                                "text-xs font-bold leading-relaxed",
+                                                                isSelected ? "text-white" : "text-slate-700"
+                                                            )}>
+                                                                {suggestion}
+                                                            </p>
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation()
                                                     addAISubtasks(task.id, aiSuggestions.suggestions)
                                                 }}
-                                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase tracking-widest py-2 rounded-xl transition-all shadow-lg shadow-indigo-100 border-b-2 border-indigo-800"
+                                                disabled={selectedSuggestions.length === 0}
+                                                className={cn(
+                                                    "w-full text-[10px] font-black uppercase tracking-widest py-3 rounded-xl transition-all shadow-lg border-b-2",
+                                                    selectedSuggestions.length === 0
+                                                        ? "bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed"
+                                                        : "bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-800 shadow-indigo-100"
+                                                )}
                                             >
-                                                Seçilenleri Alt Görev Olarak Ekle
+                                                {selectedSuggestions.length > 0
+                                                    ? `${selectedSuggestions.length} Görevi Alt Adım Olarak Ekle`
+                                                    : "Lütfen Görev Seçin"}
                                             </button>
                                         </div>
                                     </div>
