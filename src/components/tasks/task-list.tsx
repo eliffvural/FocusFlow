@@ -81,9 +81,9 @@ export function TaskList({ variant = 'full' }: TaskListProps) {
                 })
             }
             setAiSuggestions(null)
-        } catch (error) {
+        } catch (error: any) {
             console.error('Alt görevler eklenirken hata oluştu:', error)
-            alert('Bazı alt görevler eklenemedi. Lütfen tekrar deneyin.')
+            alert('Bazı alt görevler eklenemedi. Lütfen tekrar deneyin.\nHata: ' + (error.message || 'Bilinmeyen hata'))
         }
     }
 
