@@ -2,8 +2,10 @@
 
 import { TaskWithCategory } from '@/hooks/use-tasks'
 import { cn } from '@/lib/utils'
-import { CheckCircle2, Clock, Pause, Play, RotateCcw, X } from 'lucide-react'
+import { AnimatePresence } from 'framer-motion'
+import { CheckCircle2, Clock, Maximize2, Pause, Play, RotateCcw, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { ZenMode } from '../zen/zen-mode'
 
 interface TaskTimerProps {
     task: TaskWithCategory
@@ -14,6 +16,7 @@ export function TaskTimer({ task, onClose }: TaskTimerProps) {
     const [initialMinutes, setInitialMinutes] = useState(25)
     const [seconds, setSeconds] = useState(25 * 60)
     const [isActive, setIsActive] = useState(false)
+    const [isZenMode, setIsZenMode] = useState(false)
     const timerRef = useRef<NodeJS.Timeout | null>(null)
 
     // Süre değiştiğinde saniyeyi güncelle (eğer timer çalışmıyorsa)
@@ -183,11 +186,35 @@ export function TaskTimer({ task, onClose }: TaskTimerProps) {
                     </button>
                 </div>
 
+                {/* Zen Mode Toggle */}
+                <button
+                    onClick={() => setIsZenMode(true)}
+                    className="mt-8 flex items-center gap-2 px-6 py-2.5 bg-slate-50 hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 group border border-slate-200 hover:border-indigo-200"
+                >
+                    <Maximize2 className="w-3.5 h-3.5 transition-transform group-hover:scale-110" />
+                    Zen Modu'nu Başlat
+                </button>
+
                 {/* Bottom Tip */}
                 <p className="mt-12 text-slate-400 text-xs font-bold uppercase tracking-[0.1em]">
                     FocusFlow ile Verimliliğini Koru
                 </p>
             </div>
+
+            {/* Zen Mode Overlay */}
+            <AnimatePresence>
+                {isZenMode && (
+                    <ZenMode
+                        taskTitle={task.title}
+                        minutes={initialMinutes}
+                        seconds={seconds}
+                        isActive={isActive}
+                        onClose={() => setIsZenMode(false)}
+                        formatTime={formatTime}
+                        progress={progress}
+                    />
+                )}
+            </AnimatePresence>
         </div>
     )
 }
