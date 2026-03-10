@@ -35,25 +35,34 @@ export async function POST(req: Request) {
         });
 
         const prompt = `Şu ana görevi 3 mantıklı alt göreve böl: ${title}`;
+        console.log("AI Breakdown Prompt:", prompt);
 
         // 3. Yanıtı Al
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
+        console.log("AI Breakdown Raw Response:", text);
 
         if (!text) {
             throw new Error("Modelden boş yanıt döndü.");
         }
 
-        const subtasks = JSON.parse(text);
+        let subtasks;
+        try {
+            subtasks = JSON.parse(text);
+        } catch (parseError) {
+            console.error("JSON Parse Hatası:", text);
+            throw new Error("Model geçersiz bir JSON formatı döndürdü.");
+        }
 
         return NextResponse.json({ subtasks });
 
     } catch (error: any) {
-        console.error("Yapay Zeka Hatası:", error);
+        console.error("Yapay Zeka Hatası Detayı:", error);
         return NextResponse.json({
             error: 'Bir hata oluştu',
-            details: error.message
+            details: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         }, { status: 500 });
     }
 }

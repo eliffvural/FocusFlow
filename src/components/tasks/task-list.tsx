@@ -58,7 +58,7 @@ export function TaskList({ variant = 'full' }: TaskListProps) {
             }
         } catch (error: any) {
             console.error('AI Breakdown Fetch Error:', error)
-            alert('Hata: ' + error.message)
+            alert('Hata: ' + error.message + (error.details ? '\nDetay: ' + error.details : ''))
         } finally {
             setAiTaskLoading(null)
         }
